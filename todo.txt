@@ -1,3 +1,4 @@
 - hide file picker; pick on click for canvas
 - prevent errors if no image is loaded
 - resposive cavas
+- 🎙 is this the most efficient canvasContext.putImageData(imgData, 0, 0);
