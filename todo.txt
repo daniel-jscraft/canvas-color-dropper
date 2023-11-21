@@ -1,0 +1,3 @@
+- hide file picker; pick on click for canvas
+- prevent errors if no image is loaded
+- resposive cavas

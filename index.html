@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        canvas {
+            border: 2px solid red;
+        }
+
+        img {
+            display: none;
+        }
+        input {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <input id="file-picker" type='file' accept='image/*' capture='camera' value="/Users/danielnastase/Downloads/canvas-color-dropper/sample.png"/>
+    <canvas id="canvas"></canvas>
+    <img id="img" />
+<script>
+
+const canvas = document.querySelector('#canvas')
+const canvasContext = canvas.getContext("2d")
+const filePicker = document.querySelector('#file-picker')
+const img = document.querySelector('#img')
+
+let pixels = []
+
+filePicker.addEventListener('change', () => {
+    console.log(filePicker.files[0])
+    const url = window.URL.createObjectURL(filePicker.files[0])
+    img.src = url
+})
+
+img.onload = ()=> {
+    canvasContext.drawImage(img, 0, 0)
+    const imgData = canvasContext.getImageData(0, 0, canvas.width, canvas.height)
+    canvasContext.putImageData(imgData, 0, 0)
+    pixels = canvasContext.getImageData(0, 0, img.naturalWidth, img.naturalHeight);
+}
+
+function pixelColour(x, y) {
+    const index = ((y*(pixels.width*4)) + (x*4)),
+        red = pixels.data[index],
+        green = pixels.data[index + 1],
+        blue = pixels.data[index + 2],
+        a = pixels.data[index + 3];
+    return {red, green, blue, a};
+  }
+
+function readColour(ev) {
+    const x = ev.pageX - canvas.offsetLeft;
+    const y = ev.pageY - canvas.offsetTop;
+    const p = pixelColour(x, y);
+    console.log(p)
+}
+
+canvas.addEventListener('mousemove', readColour, false);
+
+</script>
+</body>
+</html>
