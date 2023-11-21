@@ -57,6 +57,36 @@ function readColour(ev) {
     const y = ev.pageY - canvas.offsetTop;
     const p = pixelColour(x, y);
     console.log(p)
+    drawMagnifyingGlassCircle(ev)
+}
+
+function drawMagnifyingGlassCircle(mouse) {
+    var magnifyingGlassRadius = -1.5;
+    var gradientThickness = 10;
+
+    canvasContext.save();
+    canvasContext.lineWidth = gradientThickness;
+    canvasContext.strokeStyle = 'rgb(0, 0, 255)';
+
+    canvasContext.beginPath();
+    canvasContext.arc(mouse.x, mouse.y,
+            120, 0, Math.PI*2, false);
+    canvasContext.clip();
+
+
+    canvasContext.strokeStyle = 'rgb(0, 0, 255)';
+    canvasContext.stroke();
+
+    canvasContext.beginPath();
+    canvasContext.arc(mouse.x, mouse.y,
+            115, 0, Math.PI*2, false);
+    canvasContext.clip();
+
+    canvasContext.lineWidth = gradientThickness;
+    canvasContext.strokeStyle = 'rgba(0,0,0,0.06)';
+    canvasContext.stroke();
+
+    canvasContext.restore();
 }
 
 canvas.addEventListener('mousemove', readColour, false);
