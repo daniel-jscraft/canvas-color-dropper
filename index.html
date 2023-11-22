@@ -71,37 +71,106 @@ function eraseMagnifyingGlass() { // Called when the mouse moves
 
 function drawMagnifyingGlassCircle(x, y) {
     eraseMagnifyingGlass()
-    // var magnifyingGlassRadius = -1.5;
-    // var gradientThickness = 10;
-
-    // canvasContext.save();
-    // canvasContext.lineWidth = gradientThickness;
-    // canvasContext.strokeStyle = 'rgb(0, 0, 255)';
-
-    // canvasContext.beginPath();
-    // canvasContext.arc(mouse.x, mouse.y,
-    //         50, 0, Math.PI*2, false);
-    // canvasContext.clip();
-
-
-    // canvasContext.strokeStyle = 'rgb(0, 0, 255)';
-    // canvasContext.stroke();
-
-    // canvasContext.restore();
-
-    // let halfWidth = currentMouse.x - mouseCoords.x;
-    // let halfHeight = currentMouse.y - mouseCoords.y;
 
     canvasContext.save()
-    canvasContext.strokeStyle = 'rgb(0, 0, 255)'
-    canvasContext.lineWidth = 4
+
     canvasContext.beginPath()
-    canvasContext.rect(
-        x - TOOL_RADIUS / 2,
-        y - TOOL_RADIUS / 2,
-        TOOL_RADIUS,
-        TOOL_RADIUS
-    );
+
+    
+    // canvasContext.rect(x - TOOL_RADIUS / 2, y - TOOL_RADIUS / 2, TOOL_RADIUS, TOOL_RADIUS);
+    // canvasContext.fillStyle = "red";
+    // canvasContext.fill();
+    // canvasContext.lineWidth = 2;
+    // canvasContext.strokeStyle = "black";
+    // canvasContext.stroke();
+
+    const SQUARES_NO = 3
+
+    console.log('-----------------')
+    // for (let v = y - SQUARES_NO; v < y + SQUARES_NO; v++) {
+    //   for (let h = x - SQUARES_NO; h < x + SQUARES_NO; h++) {
+    //     const p = pixelColour(h, v)
+    //     // template literals here
+    //     //console.log(p)
+    //     // canvasContext.fillStyle = 'rgba(' + p.r + ', ' + p.g +', ' + p.b + ', ' + p.a / 255+')'
+        
+    //     console.log(
+    //         {
+    //             x,
+    //             y,
+    //             h,
+    //             v,
+    //             cx: x - h * (TOOL_RADIUS*2 / ( SQUARES_NO * SQUARES_NO )), 
+    //             cy: y - v * (TOOL_RADIUS*2 / ( SQUARES_NO * SQUARES_NO )),
+    //             wi: TOOL_RADIUS*2 / ( SQUARES_NO * SQUARES_NO ),
+    //             he: TOOL_RADIUS*2 / ( SQUARES_NO * SQUARES_NO )
+    //         }
+    //     )
+    //     canvasContext.rect(
+    //         x - h * (TOOL_RADIUS*2 / ( SQUARES_NO * SQUARES_NO )), 
+    //         y - v * (TOOL_RADIUS*2 / ( SQUARES_NO * SQUARES_NO )), 
+    //         TOOL_RADIUS*2 / ( SQUARES_NO * SQUARES_NO ), 
+    //         TOOL_RADIUS*2 / ( SQUARES_NO * SQUARES_NO )
+    //     )
+    //     canvasContext.fillStyle = "red";
+    //     canvasContext.fill();
+    //     canvasContext.lineWidth = 2;
+    //     canvasContext.strokeStyle = "black";
+    //     canvasContext.stroke();
+    //   }
+    // }
+
+
+
+    for (let v = 0 - SQUARES_NO; v < SQUARES_NO; v++) {
+      for (let h = 0 - SQUARES_NO; h < SQUARES_NO; h++) {
+        const p = pixelColour(x + h, y + v)
+        //template literals here
+        console.log(p)
+        
+        canvasContext.rect(
+            x - h * (TOOL_RADIUS*2 / ( SQUARES_NO * SQUARES_NO )), 
+            y - v * (TOOL_RADIUS*2 / ( SQUARES_NO * SQUARES_NO )), 
+            TOOL_RADIUS*2 / ( SQUARES_NO * SQUARES_NO ), 
+            TOOL_RADIUS*2 / ( SQUARES_NO * SQUARES_NO )
+        )
+        canvasContext.fillStyle = 'rgba(' + p.red + ', ' + p.green +', ' + p.blue + ', ' + p.a +')';
+        console.log('rgba(' + p.red + ', ' + p.green +', ' + p.blue + ', ' + p.a +')')
+        canvasContext.fill();
+        canvasContext.lineWidth = 1;
+        canvasContext.strokeStyle = "black";
+        canvasContext.stroke();
+      }
+    }
+
+    // dropx.fillStyle = 'black';
+    // dropx.fillRect(0,0,300,300);
+    // dropx.save();
+    // dropx.translate((drop.width / 2) - 35.5, (drop.height / 2) - 17);
+    // for (v = y - 3; v < y + 3; v++) {
+    //   for (h = x - 3; h < x + 3; h++) {
+    //     p = pixelcolour(h, v);
+    //     dropx.fillStyle = 'rgba(' + p.r + ', ' + p.g +', ' + 
+    //                        p.b + ', ' + p.a / 255+')';
+    //     dropx.fillRect((h - x) * 70, (v - y) * 35, 69, 34); 
+    //   }
+    // }
+    // dropx.strokeStyle = 'lime';
+    // dropx.lineWidth = 2.5;
+    // dropx.shadowOffsetX = 2;
+    // dropx.shadowOffsetY = 2;
+    // dropx.shadowBlur    = 0;
+    // dropx.shadowColor   = 'black';  
+    // dropx.strokeRect(-1.5,-1,71.5,36);
+
+
+
+
+
+
+
+
+
     canvasContext.clip()
     canvasContext.stroke()
     canvasContext.restore()
