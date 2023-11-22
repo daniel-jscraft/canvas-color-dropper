@@ -23,7 +23,12 @@
     <img id="img" />
 <script>
 
-const TOOL_RADIUS = 40
+const TOOL_RADIUS = 80
+const SQUARES_NO = 7
+
+// const TOOL_RADIUS = 40
+// const SQUARES_NO = 2
+const UNIT = TOOL_RADIUS * 2 / ( SQUARES_NO * SQUARES_NO )
 
 const canvas = document.querySelector('#canvas')
 const canvasContext = canvas.getContext("2d")
@@ -32,6 +37,7 @@ const img = document.querySelector('#img')
 
 let pixels = []
 let imgData = null
+let MAIN_COLOR = null
 
 filePicker.addEventListener('change', () => {
     console.log(filePicker.files[0])
@@ -46,7 +52,7 @@ img.onload = ()=> {
     pixels = canvasContext.getImageData(0, 0, img.naturalWidth, img.naturalHeight);
 }
 
-function pixelColour(x, y) {
+function getColorFromPixel(x, y) {
     const index = ((y*(pixels.width*4)) + (x*4)),
         red = pixels.data[index],
         green = pixels.data[index + 1],
@@ -58,119 +64,44 @@ function pixelColour(x, y) {
 function readColour(ev) {
     const x = ev.pageX - canvas.offsetLeft;
     const y = ev.pageY - canvas.offsetTop;
-    const p = pixelColour(x, y);
-    console.log(p)
-    drawMagnifyingGlassCircle(x, y)
+    MAIN_COLOR = getColorFromPixel(x, y);
+    drawMagnifyingGlass(x, y)
 }
 
-function eraseMagnifyingGlass() { // Called when the mouse moves
-   if (imgData != null) {
-    canvasContext.putImageData(imgData, 0, 0);
-   }
+function eraseMagnifyingGlass() {
+   if (imgData == null) return
+   canvasContext.putImageData(imgData, 0, 0);
 }
 
-function drawMagnifyingGlassCircle(x, y) {
-    eraseMagnifyingGlass()
+function pickSurroundingColors(x, y) {
+    let colors = []
+    for (let v = 0 - SQUARES_NO; v < SQUARES_NO + 1  ; v++) {
+        for (let h = 0 - SQUARES_NO; h < SQUARES_NO + 1; h++) {
+            const c = getColorFromPixel((x + h), (y + v))
+            colors.push(c)
+        }
+    }
+    return colors
+}
 
-    canvasContext.save()
-
-    canvasContext.beginPath()
-
-    
-    // canvasContext.rect(x - TOOL_RADIUS / 2, y - TOOL_RADIUS / 2, TOOL_RADIUS, TOOL_RADIUS);
-    // canvasContext.fillStyle = "red";
-    // canvasContext.fill();
-    // canvasContext.lineWidth = 2;
-    // canvasContext.strokeStyle = "black";
-    // canvasContext.stroke();
-
-    const SQUARES_NO = 3
-
-    console.log('-----------------')
-    // for (let v = y - SQUARES_NO; v < y + SQUARES_NO; v++) {
-    //   for (let h = x - SQUARES_NO; h < x + SQUARES_NO; h++) {
-    //     const p = pixelColour(h, v)
-    //     // template literals here
-    //     //console.log(p)
-    //     // canvasContext.fillStyle = 'rgba(' + p.r + ', ' + p.g +', ' + p.b + ', ' + p.a / 255+')'
-        
-    //     console.log(
-    //         {
-    //             x,
-    //             y,
-    //             h,
-    //             v,
-    //             cx: x - h * (TOOL_RADIUS*2 / ( SQUARES_NO * SQUARES_NO )), 
-    //             cy: y - v * (TOOL_RADIUS*2 / ( SQUARES_NO * SQUARES_NO )),
-    //             wi: TOOL_RADIUS*2 / ( SQUARES_NO * SQUARES_NO ),
-    //             he: TOOL_RADIUS*2 / ( SQUARES_NO * SQUARES_NO )
-    //         }
-    //     )
-    //     canvasContext.rect(
-    //         x - h * (TOOL_RADIUS*2 / ( SQUARES_NO * SQUARES_NO )), 
-    //         y - v * (TOOL_RADIUS*2 / ( SQUARES_NO * SQUARES_NO )), 
-    //         TOOL_RADIUS*2 / ( SQUARES_NO * SQUARES_NO ), 
-    //         TOOL_RADIUS*2 / ( SQUARES_NO * SQUARES_NO )
-    //     )
-    //     canvasContext.fillStyle = "red";
-    //     canvasContext.fill();
-    //     canvasContext.lineWidth = 2;
-    //     canvasContext.strokeStyle = "black";
-    //     canvasContext.stroke();
-    //   }
-    // }
-
-
-
-    for (let v = 0 - SQUARES_NO; v < SQUARES_NO; v++) {
-      for (let h = 0 - SQUARES_NO; h < SQUARES_NO; h++) {
-        const p = pixelColour(x + h, y + v)
-        //template literals here
-        console.log(p)
-        
-        canvasContext.rect(
-            x - h * (TOOL_RADIUS*2 / ( SQUARES_NO * SQUARES_NO )), 
-            y - v * (TOOL_RADIUS*2 / ( SQUARES_NO * SQUARES_NO )), 
-            TOOL_RADIUS*2 / ( SQUARES_NO * SQUARES_NO ), 
-            TOOL_RADIUS*2 / ( SQUARES_NO * SQUARES_NO )
-        )
-        canvasContext.fillStyle = 'rgba(' + p.red + ', ' + p.green +', ' + p.blue + ', ' + p.a +')';
-        console.log('rgba(' + p.red + ', ' + p.green +', ' + p.blue + ', ' + p.a +')')
-        canvasContext.fill();
-        canvasContext.lineWidth = 1;
+function drawMagnifiedPixels(x, y, colors) {
+    for (let v = 0 - SQUARES_NO; v < SQUARES_NO + 1  ; v++) {
+      for (let h = 0 - SQUARES_NO; h < SQUARES_NO + 1; h++) {
+        const c = colors.pop()
+        canvasContext.fillStyle = `rgba(${c.red}, ${c.green}, ${c.blue}, ${c.a})`;
+        canvasContext.fillRect( x - h * UNIT, y - v * UNIT, UNIT, UNIT)
         canvasContext.strokeStyle = "black";
-        canvasContext.stroke();
+        canvasContext.strokeRect( x - h * UNIT, y - v * UNIT, UNIT, UNIT)
       }
     }
+}
 
-    // dropx.fillStyle = 'black';
-    // dropx.fillRect(0,0,300,300);
-    // dropx.save();
-    // dropx.translate((drop.width / 2) - 35.5, (drop.height / 2) - 17);
-    // for (v = y - 3; v < y + 3; v++) {
-    //   for (h = x - 3; h < x + 3; h++) {
-    //     p = pixelcolour(h, v);
-    //     dropx.fillStyle = 'rgba(' + p.r + ', ' + p.g +', ' + 
-    //                        p.b + ', ' + p.a / 255+')';
-    //     dropx.fillRect((h - x) * 70, (v - y) * 35, 69, 34); 
-    //   }
-    // }
-    // dropx.strokeStyle = 'lime';
-    // dropx.lineWidth = 2.5;
-    // dropx.shadowOffsetX = 2;
-    // dropx.shadowOffsetY = 2;
-    // dropx.shadowBlur    = 0;
-    // dropx.shadowColor   = 'black';  
-    // dropx.strokeRect(-1.5,-1,71.5,36);
-
-
-
-
-
-
-
-
-
+function drawMagnifyingGlass(x, y) {
+    eraseMagnifyingGlass()
+    canvasContext.save()
+    canvasContext.beginPath()
+    let colors = pickSurroundingColors(x, y)
+    drawMagnifiedPixels(x, y, colors)
     canvasContext.clip()
     canvasContext.stroke()
     canvasContext.restore()
