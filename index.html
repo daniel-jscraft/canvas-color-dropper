@@ -23,6 +23,8 @@
     <img id="img" />
 <script>
 
+const TOOL_RADIUS = 40
+
 const canvas = document.querySelector('#canvas')
 const canvasContext = canvas.getContext("2d")
 const filePicker = document.querySelector('#file-picker')
@@ -58,7 +60,7 @@ function readColour(ev) {
     const y = ev.pageY - canvas.offsetTop;
     const p = pixelColour(x, y);
     console.log(p)
-    drawMagnifyingGlassCircle(ev)
+    drawMagnifyingGlassCircle(x, y)
 }
 
 function eraseMagnifyingGlass() { // Called when the mouse moves
@@ -67,39 +69,42 @@ function eraseMagnifyingGlass() { // Called when the mouse moves
    }
 }
 
-function drawMagnifyingGlassCircle(mouse) {
+function drawMagnifyingGlassCircle(x, y) {
     eraseMagnifyingGlass()
-    var magnifyingGlassRadius = -1.5;
-    var gradientThickness = 10;
+    // var magnifyingGlassRadius = -1.5;
+    // var gradientThickness = 10;
 
-    canvasContext.save();
-    canvasContext.lineWidth = gradientThickness;
-    canvasContext.strokeStyle = 'rgb(0, 0, 255)';
+    // canvasContext.save();
+    // canvasContext.lineWidth = gradientThickness;
+    // canvasContext.strokeStyle = 'rgb(0, 0, 255)';
 
-    canvasContext.beginPath();
-    canvasContext.arc(mouse.x, mouse.y,
-            50, 0, Math.PI*2, false);
-    canvasContext.clip();
+    // canvasContext.beginPath();
+    // canvasContext.arc(mouse.x, mouse.y,
+    //         50, 0, Math.PI*2, false);
+    // canvasContext.clip();
 
 
-    canvasContext.strokeStyle = 'rgb(0, 0, 255)';
-    canvasContext.stroke();
+    // canvasContext.strokeStyle = 'rgb(0, 0, 255)';
+    // canvasContext.stroke();
 
-    canvasContext.restore();
+    // canvasContext.restore();
 
     // let halfWidth = currentMouse.x - mouseCoords.x;
     // let halfHeight = currentMouse.y - mouseCoords.y;
 
-    // canvasContext.save();
-    // canvasContext.strokeStyle = 'rgb(0, 0, 255)';
-    // canvasContext.rect(
-    //     mouse.x,
-    //     mouse.y,
-    //     20,
-    //     20
-    // );
-    // canvasContext.stroke();
-    // canvasContext.restore();
+    canvasContext.save()
+    canvasContext.strokeStyle = 'rgb(0, 0, 255)'
+    canvasContext.lineWidth = 4
+    canvasContext.beginPath()
+    canvasContext.rect(
+        x - TOOL_RADIUS / 2,
+        y - TOOL_RADIUS / 2,
+        TOOL_RADIUS,
+        TOOL_RADIUS
+    );
+    canvasContext.clip()
+    canvasContext.stroke()
+    canvasContext.restore()
 }
 
 canvas.addEventListener('mousemove', readColour, false);
