@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Color picker</title>
     <style>
         canvas {
-            border: 2px solid red;
+            border: 2px solid black;
         }
 
         img {
@@ -15,10 +15,28 @@
         input {
             display: block;
         }
+
+        p {
+            line-height: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        #hex-color-preview {
+            width: 1rem;
+            height: 1rem;
+            border: 1px solid;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
     </style>
 </head>
 <body>
     <input id="file-picker" type='file' accept='image/*' capture='camera' value="/Users/danielnastase/Downloads/canvas-color-dropper/sample.png"/>
+    <p>
+        <span id="hex-color-preview"></span>
+        <span id="hex-color-text"></span>
+    </p>
     <canvas id="canvas"></canvas>
     <img id="img" />
 <script>
@@ -54,6 +72,9 @@ const canvasContext = canvas.getContext("2d")
 const filePicker = document.querySelector('#file-picker')
 const img = document.querySelector('#img')
 
+const elHexColorPreview = document.querySelector('#hex-color-preview')
+const elHexColorText = document.querySelector('#hex-color-text')
+
 let pixels = []
 let imgData = null
 let CENTRAL_COLOR = null
@@ -65,6 +86,8 @@ filePicker.addEventListener('change', () => {
 })
 
 img.onload = ()=> {
+    canvas.width = img.naturalWidth
+    canvas.height = img.naturalHeight
     canvasContext.drawImage(img, 0, 0)
     imgData = canvasContext.getImageData(0, 0, canvas.width, canvas.height)
     canvasContext.putImageData(imgData, 0, 0)
@@ -73,8 +96,8 @@ img.onload = ()=> {
 }   
 
 function registerActionListeners() {
-    canvas.removeEventListener('mousemove', readColour, false)
-    canvas.addEventListener('mousemove', readColour, false)
+    canvas.removeEventListener('mousemove', updateUI, false)
+    canvas.addEventListener('mousemove', updateUI, false)
 }
 
 function getColorFromPixel(x, y) {
@@ -83,11 +106,13 @@ function getColorFromPixel(x, y) {
     return new Color(red, green, blue, a)
 }
 
-function readColour(ev) {
+function updateUI(ev) {
     const x = ev.pageX - canvas.offsetLeft;
     const y = ev.pageY - canvas.offsetTop;
     CENTRAL_COLOR = getColorFromPixel(x, y);
-    console.log('%c ' + CENTRAL_COLOR.hex(), 'color: '+CENTRAL_COLOR.hex())
+    const centralColorHex = CENTRAL_COLOR.hex()
+    elHexColorText.textContent = centralColorHex
+    elHexColorPreview.style.backgroundColor = centralColorHex
     drawMagnifyingGlass(x, y)
 }
 

@@ -1,8 +1,11 @@
 - hide file picker; pick on click for canvas
 - prevent errors if no image is loaded
 - resposive cavas
+- 🎙 thanks , the most fun project of the year maybe
 - 🎙 is this the most efficient canvasContext.putImageData(imgData, 0, 0);
 - 🎙 all of this sould be made a class maybe
+- 🎙 in demo load mutiple files
+- add placeholder to load pict
 - TS types
     point
     color
