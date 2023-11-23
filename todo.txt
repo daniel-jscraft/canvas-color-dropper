@@ -5,6 +5,8 @@
 - 🎙 is this the most efficient canvasContext.putImageData(imgData, 0, 0);
 - 🎙 all of this sould be made a class maybe
 - 🎙 in demo load mutiple files
+- 🎙 hope you like it; feel free to ask me anything 
+- 🎙 babel not use in prod
 - add placeholder to load pict
 - TS types
     point

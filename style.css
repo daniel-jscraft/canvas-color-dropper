@@ -1,0 +1,24 @@
+canvas {
+    border: 2px solid black;
+}
+
+img {
+    display: none;
+}
+input {
+    display: block;
+}
+
+p {
+    line-height: 1.5rem;
+    display: flex;
+    align-items: center;
+}
+
+#hex-color-preview {
+    width: 1rem;
+    height: 1rem;
+    border: 1px solid;
+    display: inline-block;
+    margin-right: 0.5rem;
+}

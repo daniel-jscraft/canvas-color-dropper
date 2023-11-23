@@ -4,32 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Color picker</title>
-    <style>
-        canvas {
-            border: 2px solid black;
-        }
-
-        img {
-            display: none;
-        }
-        input {
-            display: block;
-        }
-
-        p {
-            line-height: 1.5rem;
-            display: flex;
-            align-items: center;
-        }
-
-        #hex-color-preview {
-            width: 1rem;
-            height: 1rem;
-            border: 1px solid;
-            display: inline-block;
-            margin-right: 0.5rem;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <input id="file-picker" type='file' accept='image/*' capture='camera' value="/Users/danielnastase/Downloads/canvas-color-dropper/sample.png"/>
@@ -39,146 +14,151 @@
     </p>
     <canvas id="canvas"></canvas>
     <img id="img" />
-<script>
 
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script type="text/babel">
 class Color {
-    constructor(r, g, b, a) {
-        this.r = r
-        this.g = g
-        this.b = b
-        this.a = a
+    r: number;
+    g: number;
+    b: number;
+    a: number;
+
+    constructor(r: number, g: number, b: number, a: number) {
+        this.r = r;
+        this.g = g;
+        this.b = b;
+        this.a = a;
     }
 
-    rgba() {
-        return `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})`
-    } 
+    rgba(): string {
+        return `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})`;
+    }
 
-    hex() {
-        const h = v => (v.toString(16).length === 1 ? '0' + v.toString(16) : v.toString(16))
-        return `#${h(this.r)}${h(this.g)}${h(this.b)}`
+    hex(): string {
+        const h = (v: number): string => (v.toString(16).length === 1 ? '0' + v.toString(16) : v.toString(16));
+        return `#${h(this.r)}${h(this.g)}${h(this.b)}`;
     }
 }
 
-const TOOL_BORDER_SIZE = 2
-const TOOL_SIZE = 80
-const TOOL_BORDER_COLOR = 'white'
-const TOOL_GRID_COLOR = 'black'
-// for best results use odd number for SQUARES_NO 
-const SQUARES_NO = 15
-const UNIT = TOOL_SIZE / SQUARES_NO
+const TOOL_BORDER_SIZE: number = 2;
+const TOOL_SIZE: number = 80;
+const TOOL_BORDER_COLOR: string = 'white';
+const TOOL_GRID_COLOR: string = 'black';
+const SQUARES_NO: number = 15;
+const UNIT: number = TOOL_SIZE / SQUARES_NO;
 
-const canvas = document.querySelector('#canvas')
-const canvasContext = canvas.getContext("2d")
-const filePicker = document.querySelector('#file-picker')
-const img = document.querySelector('#img')
+const canvas: HTMLCanvasElement = document.querySelector('#canvas');
+const canvasContext: CanvasRenderingContext2D = canvas.getContext("2d");
+const filePicker: HTMLInputElement = document.querySelector('#file-picker');
+const img: HTMLImageElement = document.querySelector('#img');
 
-const elHexColorPreview = document.querySelector('#hex-color-preview')
-const elHexColorText = document.querySelector('#hex-color-text')
+const elHexColorPreview: HTMLElement = document.querySelector('#hex-color-preview');
+const elHexColorText: HTMLElement = document.querySelector('#hex-color-text');
 
-let pixels = []
-let imgData = null
-let CENTRAL_COLOR = null
+let pixels = [];
+let imgData: ImageData | null = null;
+let CENTRAL_COLOR: Color | null = null;
 
 filePicker.addEventListener('change', () => {
-    console.log(filePicker.files[0])
-    const url = window.URL.createObjectURL(filePicker.files[0])
-    img.src = url
-})
+    const url: string = window.URL.createObjectURL(filePicker.files[0]);
+    img.src = url;
+});
 
-img.onload = ()=> {
-    canvas.width = img.naturalWidth
-    canvas.height = img.naturalHeight
-    canvasContext.drawImage(img, 0, 0)
-    imgData = canvasContext.getImageData(0, 0, canvas.width, canvas.height)
-    canvasContext.putImageData(imgData, 0, 0)
+img.onload = () => {
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    canvasContext.drawImage(img, 0, 0);
+    imgData = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
+    canvasContext.putImageData(imgData, 0, 0);
     pixels = canvasContext.getImageData(0, 0, img.naturalWidth, img.naturalHeight);
-    registerActionListeners()
-}   
+    registerActionListeners();
+};
 
 function registerActionListeners() {
-    canvas.removeEventListener('mousemove', updateUI, false)
-    canvas.addEventListener('mousemove', updateUI, false)
+    canvas.removeEventListener('mousemove', updateUI, false);
+    canvas.addEventListener('mousemove', updateUI, false);
 }
 
-function getColorFromPixel(x, y) {
-    const index = ((y * pixels.width + x) * 4)
-    const [red, green, blue, a] = pixels.data.slice(index, index + 4)
-    return new Color(red, green, blue, a)
+function getColorFromPixel(x: number, y: number): Color {
+    const index: number = ((y * pixels.width + x) * 4);
+    const [red, green, blue, a]: number[] = pixels.data.slice(index, index + 4);
+    return new Color(red, green, blue, a);
 }
 
-function updateUI(ev) {
-    const x = ev.pageX - canvas.offsetLeft;
-    const y = ev.pageY - canvas.offsetTop;
+function updateUI(ev: MouseEvent) {
+    const x: number = ev.pageX - canvas.offsetLeft;
+    const y: number = ev.pageY - canvas.offsetTop;
     CENTRAL_COLOR = getColorFromPixel(x, y);
-    const centralColorHex = CENTRAL_COLOR.hex()
-    elHexColorText.textContent = centralColorHex
-    elHexColorPreview.style.backgroundColor = centralColorHex
-    drawMagnifyingGlass(x, y)
+    const centralColorHex: string = CENTRAL_COLOR.hex();
+    elHexColorText.textContent = centralColorHex;
+    elHexColorPreview.style.backgroundColor = centralColorHex;
+    drawMagnifyingGlass(x, y);
 }
 
 function eraseMagnifyingGlass() {
-   if (imgData == null) return
-   canvasContext.putImageData(imgData, 0, 0);
+    if (imgData == null) return;
+    canvasContext.putImageData(imgData, 0, 0);
 }
 
-function pickSurroundingColors(x, y) {
-    let colors = []
-    const limit = Math.floor(SQUARES_NO / 2)
-    for (let v = 0 - limit; v < limit + 1  ; v++) {
-      for (let h = 0 - limit; h < limit + 1; h++) {
-            const c = getColorFromPixel((x + h), (y + v))
-            colors.push(c)
+function pickSurroundingColors(x: number, y: number): Color[] {
+    let colors: Color[] = [];
+    const limit: number = Math.floor(SQUARES_NO / 2);
+    for (let v: number = 0 - limit; v < limit + 1; v++) {
+        for (let h: number = 0 - limit; h < limit + 1; h++) {
+            const c: Color = getColorFromPixel((x + h), (y + v));
+            colors.push(c);
         }
     }
-    return colors
+    return colors;
 }
 
-function drawMagnifiedPixels(x, y, colors) {
-    const limit = SQUARES_NO / 2
-    for (let v = -limit + 1; v <= limit; v++) {
-        for (let h = -limit + 1; h <= limit; h++) {
-            const color = colors.pop()
-            const xPos = x - h * UNIT
-            const yPos = y - v * UNIT
-            canvasContext.fillStyle = color.rgba()
-            canvasContext.fillRect(xPos, yPos, UNIT, UNIT)
-            canvasContext.strokeStyle = TOOL_GRID_COLOR
-            canvasContext.strokeRect(xPos, yPos, UNIT, UNIT)
+function drawMagnifiedPixels(x: number, y: number, colors: Color[]) {
+    const limit: number = SQUARES_NO / 2;
+    for (let v: number = -limit + 1; v <= limit; v++) {
+        for (let h: number = -limit + 1; h <= limit; h++) {
+            const color: Color | undefined = colors.pop();
+            if (color) {
+                const xPos: number = x - h * UNIT;
+                const yPos: number = y - v * UNIT;
+                canvasContext.fillStyle = color.rgba();
+                canvasContext.fillRect(xPos, yPos, UNIT, UNIT);
+                canvasContext.strokeStyle = TOOL_GRID_COLOR;
+                canvasContext.strokeRect(xPos, yPos, UNIT, UNIT);
+            }
         }
     }
 }
 
-function drawDecorations(x, y) {
-    const limit = SQUARES_NO / 2
-    canvasContext.strokeStyle = CENTRAL_COLOR.rgba()
-    canvasContext.lineWidth = UNIT
-    canvasContext.strokeRect( 
-        x - (limit) * UNIT, 
-        y - (limit) * UNIT, 
-        TOOL_SIZE, 
+function drawDecorations(x: number, y: number) {
+    const limit: number = SQUARES_NO / 2;
+    canvasContext.strokeStyle = CENTRAL_COLOR.rgba();
+    canvasContext.lineWidth = UNIT;
+    canvasContext.strokeRect(
+        x - (limit) * UNIT,
+        y - (limit) * UNIT,
+        TOOL_SIZE,
         TOOL_SIZE
-    )
+    );
 
-    canvasContext.strokeStyle = TOOL_BORDER_COLOR
-    canvasContext.lineWidth = TOOL_BORDER_SIZE
-    canvasContext.strokeRect( 
-        x - limit * UNIT - TOOL_BORDER_SIZE, 
-        y - limit * UNIT - TOOL_BORDER_SIZE, 
-        TOOL_SIZE + UNIT, 
-        TOOL_SIZE + UNIT 
-    )
+    canvasContext.strokeStyle = TOOL_BORDER_COLOR;
+    canvasContext.lineWidth = TOOL_BORDER_SIZE;
+    canvasContext.strokeRect(
+        x - limit * UNIT - TOOL_BORDER_SIZE,
+        y - limit * UNIT - TOOL_BORDER_SIZE,
+        TOOL_SIZE + UNIT,
+        TOOL_SIZE + UNIT
+    );
 }
 
-function drawMagnifyingGlass(x, y) {
-    eraseMagnifyingGlass()
-    canvasContext.save()
-    canvasContext.beginPath()
-    let colors = pickSurroundingColors(x, y)
-    drawMagnifiedPixels(x, y, colors)
-    drawDecorations(x, y)
-    canvasContext.clip()
-    canvasContext.stroke()
-    canvasContext.restore()
+function drawMagnifyingGlass(x: number, y: number) {
+    eraseMagnifyingGlass();
+    canvasContext.save();
+    canvasContext.beginPath();
+    let colors: Color[] = pickSurroundingColors(x, y);
+    drawMagnifiedPixels(x, y, colors);
+    drawDecorations(x, y);
+    canvasContext.clip();
+    canvasContext.restore();
 }
 </script>
 </body>
