@@ -2,6 +2,7 @@
 - prevent errors if no image is loaded
 - resposive cavas
 - 🎙 is this the most efficient canvasContext.putImageData(imgData, 0, 0);
+- 🎙 all of this sould be made a class maybe
 - TS types
     point
     color

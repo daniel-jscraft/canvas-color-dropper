@@ -41,10 +41,13 @@ class Color {
     }
 }
 
-const TOOL_RADIUS = 80
-// for best results use odd number for  SQUARES_NO 
+const TOOL_BORDER_SIZE = 2
+const TOOL_SIZE = 80
+const TOOL_BORDER_COLOR = 'white'
+const TOOL_GRID_COLOR = 'black'
+// for best results use odd number for SQUARES_NO 
 const SQUARES_NO = 15
-const UNIT = TOOL_RADIUS / SQUARES_NO
+const UNIT = TOOL_SIZE / SQUARES_NO
 
 const canvas = document.querySelector('#canvas')
 const canvasContext = canvas.getContext("2d")
@@ -66,6 +69,12 @@ img.onload = ()=> {
     imgData = canvasContext.getImageData(0, 0, canvas.width, canvas.height)
     canvasContext.putImageData(imgData, 0, 0)
     pixels = canvasContext.getImageData(0, 0, img.naturalWidth, img.naturalHeight);
+    registerActionListeners()
+}   
+
+function registerActionListeners() {
+    canvas.removeEventListener('mousemove', readColour, false)
+    canvas.addEventListener('mousemove', readColour, false)
 }
 
 function getColorFromPixel(x, y) {
@@ -78,7 +87,7 @@ function readColour(ev) {
     const x = ev.pageX - canvas.offsetLeft;
     const y = ev.pageY - canvas.offsetTop;
     CENTRAL_COLOR = getColorFromPixel(x, y);
-    console.log(CENTRAL_COLOR.hex())
+    console.log('%c ' + CENTRAL_COLOR.hex(), 'color: '+CENTRAL_COLOR.hex())
     drawMagnifyingGlass(x, y)
 }
 
@@ -108,16 +117,31 @@ function drawMagnifiedPixels(x, y, colors) {
             const yPos = y - v * UNIT
             canvasContext.fillStyle = color.rgba()
             canvasContext.fillRect(xPos, yPos, UNIT, UNIT)
-            canvasContext.strokeStyle = "black"
+            canvasContext.strokeStyle = TOOL_GRID_COLOR
             canvasContext.strokeRect(xPos, yPos, UNIT, UNIT)
         }
     }
 }
 
 function drawDecorations(x, y) {
+    const limit = SQUARES_NO / 2
     canvasContext.strokeStyle = CENTRAL_COLOR.rgba()
-    canvasContext.lineWidth = 10
-    canvasContext.strokeRect( x - TOOL_RADIUS, y - TOOL_RADIUS, TOOL_RADIUS*2, TOOL_RADIUS*2)
+    canvasContext.lineWidth = UNIT
+    canvasContext.strokeRect( 
+        x - (limit) * UNIT, 
+        y - (limit) * UNIT, 
+        TOOL_SIZE, 
+        TOOL_SIZE
+    )
+
+    canvasContext.strokeStyle = TOOL_BORDER_COLOR
+    canvasContext.lineWidth = TOOL_BORDER_SIZE
+    canvasContext.strokeRect( 
+        x - limit * UNIT - TOOL_BORDER_SIZE, 
+        y - limit * UNIT - TOOL_BORDER_SIZE, 
+        TOOL_SIZE + UNIT, 
+        TOOL_SIZE + UNIT 
+    )
 }
 
 function drawMagnifyingGlass(x, y) {
@@ -126,14 +150,11 @@ function drawMagnifyingGlass(x, y) {
     canvasContext.beginPath()
     let colors = pickSurroundingColors(x, y)
     drawMagnifiedPixels(x, y, colors)
-    //drawDecorations(x, y)
+    drawDecorations(x, y)
     canvasContext.clip()
     canvasContext.stroke()
     canvasContext.restore()
 }
-
-canvas.addEventListener('mousemove', readColour, false);
-
 </script>
 </body>
 </html>
