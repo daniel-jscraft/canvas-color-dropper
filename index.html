@@ -23,11 +23,26 @@
     <img id="img" />
 <script>
 
-// const TOOL_RADIUS = 80
-// const SQUARES_NO = 7
+class Color {
+    constructor(r, g, b, a) {
+        this.r = r
+        this.g = g
+        this.b = b
+        this.a = a
+    }
+
+    rgba() {
+        return `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})`
+    } 
+
+    hex() {
+        const h = v => (v.toString(16).length === 1 ? '0' + v.toString(16) : v.toString(16))
+        return `#${h(this.r)}${h(this.g)}${h(this.b)}`
+    }
+}
 
 const TOOL_RADIUS = 80
-// use odd number here
+// for best results use odd number for  SQUARES_NO 
 const SQUARES_NO = 15
 const UNIT = TOOL_RADIUS / SQUARES_NO
 
@@ -54,15 +69,16 @@ img.onload = ()=> {
 }
 
 function getColorFromPixel(x, y) {
-    const index = ((y * pixels.width + x) * 4),
-        [red, green, blue, a] = pixels.data.slice(index, index + 4);
-    return { red, green, blue, a };
+    const index = ((y * pixels.width + x) * 4)
+    const [red, green, blue, a] = pixels.data.slice(index, index + 4)
+    return new Color(red, green, blue, a)
 }
 
 function readColour(ev) {
     const x = ev.pageX - canvas.offsetLeft;
     const y = ev.pageY - canvas.offsetTop;
     CENTRAL_COLOR = getColorFromPixel(x, y);
+    console.log(CENTRAL_COLOR.hex())
     drawMagnifyingGlass(x, y)
 }
 
@@ -83,8 +99,6 @@ function pickSurroundingColors(x, y) {
     return colors
 }
 
-const rgba = c => `rgba(${c.red}, ${c.green}, ${c.blue}, ${c.a})`
-
 function drawMagnifiedPixels(x, y, colors) {
     const limit = SQUARES_NO / 2
     for (let v = -limit + 1; v <= limit; v++) {
@@ -92,7 +106,7 @@ function drawMagnifiedPixels(x, y, colors) {
             const color = colors.pop()
             const xPos = x - h * UNIT
             const yPos = y - v * UNIT
-            canvasContext.fillStyle = rgba(color)
+            canvasContext.fillStyle = color.rgba()
             canvasContext.fillRect(xPos, yPos, UNIT, UNIT)
             canvasContext.strokeStyle = "black"
             canvasContext.strokeRect(xPos, yPos, UNIT, UNIT)
@@ -101,7 +115,7 @@ function drawMagnifiedPixels(x, y, colors) {
 }
 
 function drawDecorations(x, y) {
-    canvasContext.strokeStyle = rgba(CENTRAL_COLOR)
+    canvasContext.strokeStyle = CENTRAL_COLOR.rgba()
     canvasContext.lineWidth = 10
     canvasContext.strokeRect( x - TOOL_RADIUS, y - TOOL_RADIUS, TOOL_RADIUS*2, TOOL_RADIUS*2)
 }
