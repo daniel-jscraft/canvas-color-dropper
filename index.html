@@ -23,12 +23,13 @@
     <img id="img" />
 <script>
 
-const TOOL_RADIUS = 80
-const SQUARES_NO = 7
+// const TOOL_RADIUS = 80
+// const SQUARES_NO = 7
 
-// const TOOL_RADIUS = 40
-// const SQUARES_NO = 2
-const UNIT = TOOL_RADIUS * 2 / ( SQUARES_NO * SQUARES_NO )
+const TOOL_RADIUS = 80
+// use odd number here
+const SQUARES_NO = 15
+const UNIT = TOOL_RADIUS / SQUARES_NO
 
 const canvas = document.querySelector('#canvas')
 const canvasContext = canvas.getContext("2d")
@@ -37,7 +38,7 @@ const img = document.querySelector('#img')
 
 let pixels = []
 let imgData = null
-let MAIN_COLOR = null
+let CENTRAL_COLOR = null
 
 filePicker.addEventListener('change', () => {
     console.log(filePicker.files[0])
@@ -53,18 +54,15 @@ img.onload = ()=> {
 }
 
 function getColorFromPixel(x, y) {
-    const index = ((y*(pixels.width*4)) + (x*4)),
-        red = pixels.data[index],
-        green = pixels.data[index + 1],
-        blue = pixels.data[index + 2],
-        a = pixels.data[index + 3];
-    return {red, green, blue, a};
+    const index = ((y * pixels.width + x) * 4),
+        [red, green, blue, a] = pixels.data.slice(index, index + 4);
+    return { red, green, blue, a };
 }
 
 function readColour(ev) {
     const x = ev.pageX - canvas.offsetLeft;
     const y = ev.pageY - canvas.offsetTop;
-    MAIN_COLOR = getColorFromPixel(x, y);
+    CENTRAL_COLOR = getColorFromPixel(x, y);
     drawMagnifyingGlass(x, y)
 }
 
@@ -75,8 +73,9 @@ function eraseMagnifyingGlass() {
 
 function pickSurroundingColors(x, y) {
     let colors = []
-    for (let v = 0 - SQUARES_NO; v < SQUARES_NO + 1  ; v++) {
-        for (let h = 0 - SQUARES_NO; h < SQUARES_NO + 1; h++) {
+    const limit = Math.floor(SQUARES_NO / 2)
+    for (let v = 0 - limit; v < limit + 1  ; v++) {
+      for (let h = 0 - limit; h < limit + 1; h++) {
             const c = getColorFromPixel((x + h), (y + v))
             colors.push(c)
         }
@@ -84,16 +83,27 @@ function pickSurroundingColors(x, y) {
     return colors
 }
 
+const rgba = c => `rgba(${c.red}, ${c.green}, ${c.blue}, ${c.a})`
+
 function drawMagnifiedPixels(x, y, colors) {
-    for (let v = 0 - SQUARES_NO; v < SQUARES_NO + 1  ; v++) {
-      for (let h = 0 - SQUARES_NO; h < SQUARES_NO + 1; h++) {
-        const c = colors.pop()
-        canvasContext.fillStyle = `rgba(${c.red}, ${c.green}, ${c.blue}, ${c.a})`;
-        canvasContext.fillRect( x - h * UNIT, y - v * UNIT, UNIT, UNIT)
-        canvasContext.strokeStyle = "black";
-        canvasContext.strokeRect( x - h * UNIT, y - v * UNIT, UNIT, UNIT)
-      }
+    const limit = SQUARES_NO / 2
+    for (let v = -limit + 1; v <= limit; v++) {
+        for (let h = -limit + 1; h <= limit; h++) {
+            const color = colors.pop()
+            const xPos = x - h * UNIT
+            const yPos = y - v * UNIT
+            canvasContext.fillStyle = rgba(color)
+            canvasContext.fillRect(xPos, yPos, UNIT, UNIT)
+            canvasContext.strokeStyle = "black"
+            canvasContext.strokeRect(xPos, yPos, UNIT, UNIT)
+        }
     }
+}
+
+function drawDecorations(x, y) {
+    canvasContext.strokeStyle = rgba(CENTRAL_COLOR)
+    canvasContext.lineWidth = 10
+    canvasContext.strokeRect( x - TOOL_RADIUS, y - TOOL_RADIUS, TOOL_RADIUS*2, TOOL_RADIUS*2)
 }
 
 function drawMagnifyingGlass(x, y) {
@@ -102,6 +112,7 @@ function drawMagnifyingGlass(x, y) {
     canvasContext.beginPath()
     let colors = pickSurroundingColors(x, y)
     drawMagnifiedPixels(x, y, colors)
+    //drawDecorations(x, y)
     canvasContext.clip()
     canvasContext.stroke()
     canvasContext.restore()

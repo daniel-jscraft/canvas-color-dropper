@@ -5,3 +5,9 @@
 - TS types
     point
     color
+
+cerc in loc de patrat
+border main color
+center pixel + border main color
+on click save color
+write text color
