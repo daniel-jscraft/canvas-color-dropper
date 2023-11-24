@@ -40,19 +40,20 @@ class Color {
     }
 }
 
-const RESIZE_WINDOW_DEBOUNCE_TIME = 1500;
-const TOOL_BORDER_SIZE: number = 2;
+// Tool config
 const TOOL_SIZE: number = 100;
+const SQUARES_NO: number = 31;
+const TOOL_BORDER_SIZE: number = 2;
 const TOOL_BORDER_COLOR: string = 'white';
 const TOOL_GRID_COLOR: string = 'black';
-const SQUARES_NO: number = 31;
-const UNIT: number = TOOL_SIZE / SQUARES_NO;
+const RESIZE_WINDOW_DEBOUNCE_TIME = 1500;
 
+
+// DOM elements init
 const canvas: HTMLCanvasElement = document.querySelector('#canvas');
 const canvasContext: CanvasRenderingContext2D = canvas.getContext('2d', { willReadFrequently: true });
 const filePicker: HTMLInputElement = document.querySelector('#file-picker');
 const img: HTMLImageElement = document.querySelector('#img');
-
 const elHexColorPreview: HTMLElement = document.querySelector('#hex-color-preview');
 const elHexColorText: HTMLElement = document.querySelector('#hex-color-text');
 
@@ -60,8 +61,8 @@ let pixels = [];
 let imgCanvasRatioX: number = 1;
 let imgCanvasRatioY: number = 1
 let imgData: ImageData | null = null;
-let CENTRAL_COLOR: Color | null = null;
-
+let centralColor: Color | null = null;
+let unit: number = TOOL_SIZE / SQUARES_NO;
 
 
 filePicker.addEventListener('change', () => {
@@ -117,8 +118,8 @@ function getColorFromPixel(x: number, y: number): Color {
 function updateUI(ev: MouseEvent) {
     const x: number = ev.pageX - canvas.offsetLeft;
     const y: number = ev.pageY - canvas.offsetTop;
-    CENTRAL_COLOR = getColorFromPixel(x, y);
-    const centralColorHex: string = CENTRAL_COLOR.hex();
+    centralColor = getColorFromPixel(x, y);
+    const centralColorHex: string = centralColor.hex();
     elHexColorText.textContent = centralColorHex;
     elHexColorPreview.style.backgroundColor = centralColorHex;
     drawMagnifyingGlass(x, y);
@@ -151,12 +152,12 @@ function drawMagnifiedPixels(x: number, y: number, colors: Color[]) {
         for (let h: number = -limit + 1; h <= limit; h++) {
             const color: Color | undefined = colors.pop();
             if (color) {
-                const xPos: number = x - h * UNIT;
-                const yPos: number = y - v * UNIT;
+                const xPos: number = x - h * unit;
+                const yPos: number = y - v * unit;
                 canvasContext.fillStyle = color.rgba();
-                canvasContext.fillRect(xPos, yPos, UNIT, UNIT);
+                canvasContext.fillRect(xPos, yPos, unit, unit);
                 canvasContext.strokeStyle = TOOL_GRID_COLOR;
-                canvasContext.strokeRect(xPos, yPos, UNIT, UNIT);
+                canvasContext.strokeRect(xPos, yPos, unit, unit);
             }
         }
     }
@@ -164,11 +165,11 @@ function drawMagnifiedPixels(x: number, y: number, colors: Color[]) {
 
 function drawDecorations(x: number, y: number) {
     const limit: number = SQUARES_NO / 2;
-    canvasContext.strokeStyle = CENTRAL_COLOR.rgba();
-    canvasContext.lineWidth = UNIT;
+    canvasContext.strokeStyle = centralColor.rgba();
+    canvasContext.lineWidth = unit;
     canvasContext.strokeRect(
-        x - (limit) * UNIT,
-        y - (limit) * UNIT,
+        x - (limit) * unit,
+        y - (limit) * unit,
         TOOL_SIZE,
         TOOL_SIZE
     );
@@ -176,10 +177,10 @@ function drawDecorations(x: number, y: number) {
     canvasContext.strokeStyle = TOOL_BORDER_COLOR;
     canvasContext.lineWidth = TOOL_BORDER_SIZE;
     canvasContext.strokeRect(
-        x - limit * UNIT - TOOL_BORDER_SIZE,
-        y - limit * UNIT - TOOL_BORDER_SIZE,
-        TOOL_SIZE + UNIT,
-        TOOL_SIZE + UNIT
+        x - limit * unit - TOOL_BORDER_SIZE,
+        y - limit * unit - TOOL_BORDER_SIZE,
+        TOOL_SIZE + unit,
+        TOOL_SIZE + unit
     );
 }
 
