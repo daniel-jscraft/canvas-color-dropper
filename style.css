@@ -1,10 +1,20 @@
+body {
+    margin: 0px;
+}
+
 canvas {
-    border: 2px solid black;
+    border: 1px solid;
 }
 
 img {
     display: none;
 }
+
+input, p {
+    margin: 0.5rem;
+} 
+
+
 input {
     display: block;
 }

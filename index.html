@@ -40,6 +40,7 @@ class Color {
     }
 }
 
+const RESIZE_WINDOW_DEBOUNCE_TIME = 1500;
 const TOOL_BORDER_SIZE: number = 2;
 const TOOL_SIZE: number = 100;
 const TOOL_BORDER_COLOR: string = 'white';
@@ -61,6 +62,8 @@ let imgCanvasRatioY: number = 1
 let imgData: ImageData | null = null;
 let CENTRAL_COLOR: Color | null = null;
 
+
+
 filePicker.addEventListener('change', () => {
     const url: string = window.URL.createObjectURL(filePicker.files[0]);
     img.src = url;
@@ -68,12 +71,11 @@ filePicker.addEventListener('change', () => {
 
 img.onload = () => {
     saveOriginalImg()
-    setupCanvas()
+    drawCanvas()
     registerActionListeners();
-    getRatios()
 };
 
-function setupCanvas() {
+function drawCanvas() {
     if (img.naturalWidth > window.innerWidth) {
         canvas.width = window.innerWidth;
         canvas.height = img.naturalHeight * ( window.innerWidth / img.naturalWidth );
@@ -85,6 +87,7 @@ function setupCanvas() {
     canvasContext.drawImage(img, 0, 0, canvas.width, canvas.height );
     imgData = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
     canvasContext.putImageData(imgData, 0, 0);
+    getRatios();
 }
 
 function saveOriginalImg() {
@@ -102,6 +105,7 @@ function getRatios() {
 function registerActionListeners() {
     canvas.removeEventListener('mousemove', updateUI, false);
     canvas.addEventListener('mousemove', updateUI, false);
+    setResizeHandler(drawCanvas, RESIZE_WINDOW_DEBOUNCE_TIME);
 }
 
 function getColorFromPixel(x: number, y: number): Color {
@@ -121,7 +125,7 @@ function updateUI(ev: MouseEvent) {
 }
 
 function eraseMagnifyingGlass() {
-    if (imgData == null) return;
+    if (!imgData) return;
     canvasContext.putImageData(imgData, 0, 0);
 }
 
@@ -188,6 +192,20 @@ function drawMagnifyingGlass(x: number, y: number) {
     drawDecorations(x, y);
     canvasContext.clip();
     canvasContext.restore();
+}
+
+function setResizeHandler(callback, timeout) {
+    var timer_id = undefined;
+    window.addEventListener('resize', ()=> {
+        if(timer_id != undefined) {
+            clearTimeout(timer_id);
+            timer_id = undefined;
+        }
+        timer_id = setTimeout(function() {
+            timer_id = undefined;
+            callback();
+        }, timeout);
+    });
 }
 </script>
 </body>
