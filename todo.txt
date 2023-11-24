@@ -17,3 +17,5 @@ border main color
 center pixel + border main color
 on click save color
 write text color
+deploy on Github pages
+better config org from constants

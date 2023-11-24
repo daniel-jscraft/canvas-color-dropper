@@ -41,14 +41,14 @@ class Color {
 }
 
 const TOOL_BORDER_SIZE: number = 2;
-const TOOL_SIZE: number = 80;
+const TOOL_SIZE: number = 100;
 const TOOL_BORDER_COLOR: string = 'white';
 const TOOL_GRID_COLOR: string = 'black';
-const SQUARES_NO: number = 15;
+const SQUARES_NO: number = 31;
 const UNIT: number = TOOL_SIZE / SQUARES_NO;
 
 const canvas: HTMLCanvasElement = document.querySelector('#canvas');
-const canvasContext: CanvasRenderingContext2D = canvas.getContext("2d");
+const canvasContext: CanvasRenderingContext2D = canvas.getContext('2d', { willReadFrequently: true });
 const filePicker: HTMLInputElement = document.querySelector('#file-picker');
 const img: HTMLImageElement = document.querySelector('#img');
 
@@ -56,6 +56,8 @@ const elHexColorPreview: HTMLElement = document.querySelector('#hex-color-previe
 const elHexColorText: HTMLElement = document.querySelector('#hex-color-text');
 
 let pixels = [];
+let imgCanvasRatioX: number = 1;
+let imgCanvasRatioY: number = 1
 let imgData: ImageData | null = null;
 let CENTRAL_COLOR: Color | null = null;
 
@@ -65,14 +67,37 @@ filePicker.addEventListener('change', () => {
 });
 
 img.onload = () => {
-    canvas.width = img.naturalWidth;
-    canvas.height = img.naturalHeight;
-    canvasContext.drawImage(img, 0, 0);
+    saveOriginalImg()
+    setupCanvas()
+    registerActionListeners();
+    getRatios()
+};
+
+function setupCanvas() {
+    if (img.naturalWidth > window.innerWidth) {
+        canvas.width = window.innerWidth;
+        canvas.height = img.naturalHeight * ( window.innerWidth / img.naturalWidth );
+    }
+    else {
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+    }
+    canvasContext.drawImage(img, 0, 0, canvas.width, canvas.height );
     imgData = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
     canvasContext.putImageData(imgData, 0, 0);
+}
+
+function saveOriginalImg() {
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    canvasContext.drawImage(img, 0, 0, canvas.width, canvas.height );
     pixels = canvasContext.getImageData(0, 0, img.naturalWidth, img.naturalHeight);
-    registerActionListeners();
-};
+}
+
+function getRatios() {
+    imgCanvasRatioX = img.naturalWidth > canvas.width ? img.naturalWidth / canvas.width : 1
+    imgCanvasRatioY = img.naturalHeight > canvas.height ? img.naturalHeight / canvas.height : 1
+}
 
 function registerActionListeners() {
     canvas.removeEventListener('mousemove', updateUI, false);
@@ -103,6 +128,10 @@ function eraseMagnifyingGlass() {
 function pickSurroundingColors(x: number, y: number): Color[] {
     let colors: Color[] = [];
     const limit: number = Math.floor(SQUARES_NO / 2);
+
+    x = Math.floor(x * imgCanvasRatioX)
+    y = Math.floor(y * imgCanvasRatioY)
+
     for (let v: number = 0 - limit; v < limit + 1; v++) {
         for (let h: number = 0 - limit; h < limit + 1; h++) {
             const c: Color = getColorFromPixel((x + h), (y + v));
