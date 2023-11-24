@@ -194,15 +194,17 @@ function drawMagnifyingGlass(x: number, y: number) {
     canvasContext.restore();
 }
 
-function setResizeHandler(callback, timeout) {
-    var timer_id = undefined;
-    window.addEventListener('resize', ()=> {
-        if(timer_id != undefined) {
-            clearTimeout(timer_id);
-            timer_id = undefined;
+function setResizeHandler(callback: () => void, timeout: number): void {
+    let timerId: ReturnType<typeof setTimeout> | undefined;
+
+    window.addEventListener('resize', () => {
+        if (timerId) {
+            clearTimeout(timerId);
+            timerId = undefined;
         }
-        timer_id = setTimeout(function() {
-            timer_id = undefined;
+
+        timerId = setTimeout(() => {
+            timerId = undefined;
             callback();
         }, timeout);
     });
